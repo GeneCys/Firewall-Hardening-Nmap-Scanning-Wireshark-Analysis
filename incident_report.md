@@ -56,6 +56,24 @@ sudo ufw enable
 
 ---
 
+# Supporting Files
+
+| File | Description |
+|------|------------|
+| baseline.txt | Text file of packet capture pre firewall rules |
+| firewall_blocking.txt  | Text file of packet capture after firewall rules set and client performs scans |
+| wireshark_filters_1.png | Screenshot of wireshark filters used |
+| wireshark_filters_2.png | Screenshot of wireshark filters used |
+| wireshark_filters_3.png | Screenshot of wireshark filters used |
+| wireshark_filters_4.png | Screenshot of wireshark filters used |
+| wireshark_filters_5.png | Screenshot of wireshark filters used |
+| nmap_scan_1.png | Screenshot of Nmap scans from Client |
+| nmap_scan_2.png | Screenshot of Nmap scans from Client |
+| README.md | Markdown file outlining the exercise and it's parameters/goals |
+| grc_report.md | GRC report regarding the exercise |
+
+---
+
 # SOC Analysis
 1. Allowed traffic - Port 80 (nginx)
 - Nmap output:
