@@ -104,8 +104,10 @@ Wireshark was used to capture and verify the firewall behaviour. Filters used:
 | wireshark_filters_5.png | Screenshot of wireshark filters used |
 | nmap_scan_1.png | Screenshot of Nmap scans from Client |
 | nmap_scan_2.png | Screenshot of Nmap scans from Client |
+| incident_report.md | SOC Incident report regarding the exercise |
+| grc_report.md | GRC report regarding the exercise |
 
-The original .pcapng files are kept offline and available upon request
+The original packet capture .pcapng files are kept offline and available upon request
 
 --- 
 
