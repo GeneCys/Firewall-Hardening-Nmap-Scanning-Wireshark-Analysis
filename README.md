@@ -1,136 +1,147 @@
-# Firewall-Hardening-Nmap-Scanning-Wireshark-Analysis
-This exercise demonstrates how to validate firewall rules using UFW, Nmap, and Wireshark inside a controlled SOC lab environment.
+# Firewall Hardening & Validation Lab
 
-- **Author:** Gene Crittenden
-- **Lab Environment:** VirtualBox (Host-Only Network)
-- **Web Server:** 192.168.56.101
-- **Client/Scanner:** 192.168.56.102
+**SOC-style exercise** demonstrating firewall rule validation using UFW, Nmap, and Wireshark inside a controlled lab environment.
 
----
-
-# Overview
-
-This exercise demonstrates how to validate firewall rules using **UFW**, **Nmap**, and **Wireshark** inside a controlled SOC lab environment.
-The goal is to show how a SOC analyst confirms that:
-
-- Allowed services respond normally
-- Blocked ports drop traffic silently
-- Rejected ports actively return ICMP/TCP error messages
-- Network captures can be used as evidence of security control behavior
-
-This exercise is part of a broader SOC/GRC home-lab designed for hands-on practice and GitHub documentation.
+- **Author:** Gene Crittenden  
+- **Lab Environment:** VirtualBox (Host-Only Network)  
+- **Web Server VM:** `192.168.56.101` 
+- **Client/Scanner VM:** `192.168.56.102`  
 
 ---
 
-# Lab Setup
+## Overview
 
-### **Virtual Machines**
+This exercise demonstrates how to validate firewall rules using **UFW**, **Nmap**, and **Wireshark**. The goal is to show how a SOC analyst confirms that:
+
+- Allowed services respond normally  
+- Blocked ports drop traffic silently  
+- Rejected ports actively return ICMP/TCP error messages  
+- Network captures can serve as evidence of security control behavior  
+
+This lab is part of a broader SOC/GRC home-lab designed for hands-on practice and professional GitHub documentation.
+
+---
+
+## Lab Setup
+
+### Virtual Machines
 | Role | IP Address | Purpose |
 |------|------------|---------|
-| Web Server | 192.168.56.101 | nginx + UFW firewall |
-| Client/Scanner | 192.168.56.102 | Nmap + Wireshark |
+| Web Server | `192.168.56.101` | nginx + UFW firewall |
+| Client/Scanner | `192.168.56.102` | Nmap + Wireshark |
 
-### **Installed Tools**
-- nginx (web server)
-- ufw (firewall)
-- nmap (scanner)
-- wireshark/tshark (packet capture & analysis)
+### Installed Tools
+- nginx (web server)  
+- ufw (firewall)  
+- nmap (scanner)  
+- wireshark/tshark (packet capture & analysis)  
 
-### **Network**
-VirtualBox **Host-Only** network: isolated from the internet, safe for scanning.
-
----
-
-## 🔧 Firewall Configuration (Web Server)
-
-The following rules were used to test both **DROP** and **REJECT** actions:
-
-- sudo ufw default deny incoming
-- sudo ufw allow 80/tcp
-- sudo ufw allow 22/tcp # optional
-- sudo ufw deny 443
-- sudo ufw reject 443
-- sudo ufw enable
-- sudo ufw status verbose
-
-| Port | Status |
-|------|------------|
-| Port 80 | Allowed (nginx) |
-| Port 22 | Allowed (optional) |
-| Port 443 | Intentionally set to Deny and Reject |
-| All others | Silently dropped |
+### Network
+- VirtualBox **Host-Only Network**: isolated from the internet, safe for testing
 
 ---
 
-# **Nmap Tests from Client**
-1. Baseline Scan before firewall rules
-- nmap 192.168.56.101
-2. Firewall validation scan
-- nmap -sS -Pn 192.168.56.101
-3. Targeted scan fore Port 443
-- nmap -sS -p 443 192.168.56.101
+## Firewall Configuration (Web Server)
 
-Observations:
+The following rules were applied to test **DROP** and **REJECT** behavior:
+
+<details><summary>UFW Commands</summary>
+
+```bash
+sudo ufw default deny incoming
+sudo ufw allow 80/tcp
+sudo ufw allow 22/tcp  # optional
+sudo ufw deny 443
+sudo ufw reject 443
+sudo ufw enable
+sudo ufw status verbose
+```
+</details>
+
+---
+
+## Nmap Tests (Client VM)
+
+<details><summary>Nmap Commands</summary>
+
+1. Baseline scan before firewall rules:
+```bash
+nmap 192.168.56.101
+```
+
+2. Firewall Validation Scan
+```bash
+nmap -sS -Pn 192.168.56.101
+```
+
+3. Targetted Scan of Port 443
+```bash
+nmap -sS -p 443 192.168.56.101
+```
+</details>
+
+**Observations:**
 - Port 80 responds normally
-- Port 443 appears as closed/filtered
-- Oter ports sow as filtered (silent drop)
-
-# **Wireshark Analysis on Web Server**
-
-Wireshark was used to capture and verify the firewall behaviour. Filters used:
-1. Allowed traffic on Port 80
-- tcp.port == 80
-2. Dropped traffic (silent drop/SYN retransmission)
-- tcp.flags.syn == 1 && ip.src == 192.168.56.102
-3. Rejected traffic (ICMPv6 admin prohibited on port 443)
-- icmpv6
-4 . Rejected traffic (TCP reset)
-- tcp.flags.resent == 1
-5. General communication between hosts
-- ip.addr == 192.168.56.101 || ip.addr == 192.168.56.102
-
---- 
-
-# Supporting Files
-
-| File | Description |
-|------|------------|
-| baseline.txt | Text file of packet capture pre firewall rules |
-| firewall_blocking.txt  | Text file of packet capture after firewall rules set and client performs scans |
-| wireshark_filters_1.png | Screenshot of wireshark filters used |
-| wireshark_filters_2.png | Screenshot of wireshark filters used |
-| wireshark_filters_3.png | Screenshot of wireshark filters used |
-| wireshark_filters_4.png | Screenshot of wireshark filters used |
-| wireshark_filters_5.png | Screenshot of wireshark filters used |
-| nmap_scan_1.png | Screenshot of Nmap scans from Client |
-| nmap_scan_2.png | Screenshot of Nmap scans from Client |
-| incident_report.md | SOC Incident report regarding the exercise |
-| grc_report.md | GRC report regarding the exercise |
-
-The original packet capture .pcapng files are kept offline and available upon request
-
---- 
-
-# Goals for this Exercise
-
-**SOC Skills**
-- Validate firewall configurations
-- Capture and analyse network traffic
-- Distinguish DROP vs REJECT behaviour
-- Understand TCP retransmissions and ICMP errors
-- Document findings professionally
-
-**GRC Skills**
-- Demonstrate that controls are properly implementing
-- Produce evidence for audits or compliance
-- Show how technical controls support policy requirements
+- Port 443 shows as closed/filtered
+- Other ports appear filtered (silent drop)
 
 ---
 
-# Conclusion
+## Wireshark Analysis (Web Server)
 
-This exercise condirms that the firewall on 192.168.56.101 is working correctly:
--  Allowed services (HTTP) are reachable
--  Unauthorised ports are either silenty dropped or explicitly rejected
--  Network captures support the expected behaviour
--  Documentation and artifacts show a complete SOC investigation workflow
+Packet captures were used to verify firewall behavior. Filters applied:
+
+<details> <summary>Wireshark Filters</summary>
+
+```wireshark
+Allowed traffic (Port 80): tcp.port == 80
+Dropped traffic (SYN retransmissions): tcp.flags.syn == 1 && ip.src == 192.168.56.102
+Rejected traffic (ICMP error): icmpv6
+Rejected traffic (TCP reset): tcp.flags.reset == 1
+General communication: ip.addr == 192.168.56.101 || ip.addr == 192.168.56.102
+```
+</details>
+
+---
+
+## Skills Demonstrated
+- Firewall validation using UFW
+- Nmap scanning & port analysis
+- Network traffic analysis with Wireshark
+- SOC workflow: Detect → Verify firewall controls
+- Troubleshooting firewall behavior and TCP/ICMP responses
+
+---
+
+## Lessons Learned
+- Allowed, blocked, and rejected traffic behaves differently; verification requires both scanning and packet capture
+- TCP retransmissions indicate silently dropped packets
+- ICMP and TCP reset messages are evidence of rejected ports
+- Documenting firewall behavior creates reproducible SOC evidence for GRC and audit purposes
+
+---
+
+## Supporting Files
+**Reports**
+- [Incident Report](./incident_report.md)
+- [GRC Report](./grc_report.md)
+
+[Logs](./logs)
+- Nmap Scans & Wrieshark Packet Captures
+  - _The original .pcapng file is kept offline and available upon request._
+
+[Screenshots](./screenshots)
+- Nmap Scans & Wireshark Filters
+
+---
+
+## Conclusion
+This lab confirms that the firewall on `192.168.56.101` is functioning as expected:
+- Allowed services (HTTP) are reachable
+- Unauthorized ports are either silently dropped or explicitly rejected
+- Packet captures validate firewall behavior
+- Documentation demonstrates a complete SOC investigation workflow
+
+--- 
+
+**End of Report**
